@@ -17,6 +17,10 @@ type BananoData = {
 	history: HistoryData[];
 };
 
+type ErrorResponse = {
+	error: string;
+};
+
 interface D3Node extends SimulationNodeDatum {
 	id: string;
 }
@@ -26,20 +30,28 @@ interface D3Link extends SimulationLinkDatum<D3Node> {
 	target: string;
 	value: number;
 }
+
 interface CacheItem {
 	data: BananoData;
 	timestamp: number;
+}
+
+interface LoaderConfig {
+	width: number;
+	height: number;
 }
 
 class Visualizer {
 	inputElem: HTMLInputElement;
 	submitBtn: HTMLInputElement;
 	svgElem: SVGElement;
+	errorElem: HTMLSpanElement;
 
 	constructor() {
 		this.inputElem = document.querySelector(".account-input");
 		this.submitBtn = document.querySelector(".account-submit");
 		this.svgElem = document.querySelector(".d3-svg");
+		this.errorElem = document.querySelector(".error .message");
 
 		this.svgElem.setAttribute("width", `${this.svgElem.parentElement.clientWidth}px`);
 		this.svgElem.setAttribute("height", `${this.svgElem.parentElement.clientHeight}px`);
@@ -49,7 +61,7 @@ class Visualizer {
 				this.submitBtn.click();
 			}
 		});
-		this.submitBtn.addEventListener("click", () => this.fetchAccountHistory(this.inputElem.value));
+		this.submitBtn.addEventListener("click", () => this.selectAccount(this.inputElem.value));
 		window.addEventListener("resize", () => this.resizeCanvas());
 	}
 
@@ -89,34 +101,56 @@ class Visualizer {
 		return null;
 	}
 
+	clearError(): void {
+		this.errorElem.innerText = "";
+	}
+
+	handleError(error: string): void {
+		this.errorElem.innerText = error;
+	}
+
 	async selectAccount(account: string): Promise<void> {
+		document.documentElement.scrollTop = this.svgElem.parentElement.offsetTop;
+
 		this.inputElem.value = account;
 		await this.fetchAccountHistory(account);
 	}
 
 	async fetchAccountHistory(account: string): Promise<void> {
+		this.clearError();
+		this.drawLoader({ width: 100, height: 100 });
+
 		const cacheItem = this.retrieveCache(account);
 		if (cacheItem) {
 			this.drawTransactions(account, cacheItem.data);
 			return;
 		}
+		try {
+			const response = await fetch("https://kaliumapi.appditto.com/api", {
+				headers: {
+					"content-type": "application/json",
+					"sec-fetch-dest": "empty",
+					"sec-fetch-mode": "cors",
+					"sec-fetch-site": "cross-site",
+				},
+				body: JSON.stringify({ action: "account_history", account, count: 1000, raw: false }),
+				method: "POST",
+				mode: "cors",
+				credentials: "omit",
+			});
 
-		const response = await fetch("https://kaliumapi.appditto.com/api", {
-			headers: {
-				"content-type": "application/json",
-				"sec-fetch-dest": "empty",
-				"sec-fetch-mode": "cors",
-				"sec-fetch-site": "cross-site",
-			},
-			body: JSON.stringify({ action: "account_history", account, count: 1000, raw: false }),
-			method: "POST",
-			mode: "cors",
-			credentials: "omit",
-		});
-
-		const data: BananoData = await response.json();
-		this.saveResponse(data);
-		this.drawTransactions(account, data);
+			const data: BananoData & ErrorResponse = await response.json();
+			if (data.error) {
+				this.clearCanvas();
+				this.handleError(data.error);
+				return;
+			}
+			this.saveResponse(data);
+			this.drawTransactions(account, data);
+		} catch (error) {
+			this.clearCanvas();
+			this.handleError("Failed to load transaction history");
+		}
 	}
 
 	getNodes(data: BananoData): D3Node[] {
@@ -147,6 +181,38 @@ class Visualizer {
 
 	clearCanvas(): void {
 		d3.select(this.svgElem).selectAll("*").remove();
+	}
+
+	drawLoader(config: LoaderConfig): void {
+		const svg = d3.select(this.svgElem);
+		this.clearCanvas();
+		this.resizeCanvas();
+
+		const radius = Math.min(config.width, config.height) / 2;
+		const tau = 2 * Math.PI;
+
+		const arc = d3
+			.arc()
+			.innerRadius(radius * 0.5)
+			.outerRadius(radius * 0.9)
+			.startAngle(0);
+
+		svg.append("path")
+			.datum({ endAngle: 0.33 * tau })
+			.style("fill", "#4D4D4D")
+			.attr("d", arc)
+			.attr("transform", `translate(${this.svgElem.clientWidth / 2} ${this.svgElem.clientHeight / 2})`)
+			.call(spin, 1500);
+
+		function spin(selection: d3.Selection<SVGPathElement, unknown, null, unknown>, duration: number) {
+			selection
+				.transition()
+				.ease(t => t * t)
+				.duration(duration)
+				.attrTween("transform", () => d3.interpolateString("rotate(0)", "rotate(360)"));
+
+			setTimeout(() => spin(selection, duration), duration);
+		}
 	}
 
 	drawTransactions(selfAccount: string, data: BananoData): void {

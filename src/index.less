@@ -42,8 +42,18 @@ body {
     }
 }
 
+.error {
+    display        : flex;
+    justify-content: center;
+
+    .message {
+        color      : #ff0707;
+        font-weight: bold;
+    }
+}
+
 .canvas {
-    height: 100vh;
+    height: calc(100vh - 100px);
 
     svg {
         user-select: none;
