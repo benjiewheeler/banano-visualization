@@ -1,0 +1,41 @@
+{
+	"name": "banano-visualization",
+	"version": "1.0.0",
+	"description": "A Banano transactions visualization made with D3.js",
+	"main": "index.js",
+	"author": "Benjamin Wheeler <benjiewheeler@yandex.com>",
+	"license": "MIT",
+	"private": true,
+	"scripts": {
+		"build.dev": "webpack --progress --cache --mode development",
+		"build.prod": "webpack --cache --mode production",
+		"build.watch": "webpack serve --progress --cache --hot --mode development"
+	},
+	"dependencies": {
+		"d3": "^6.6.1",
+		"lodash": "^4.17.21"
+	},
+	"devDependencies": {
+		"@types/d3": "^6.3.0",
+		"@types/lodash": "^4.14.168",
+		"@types/node": "^12.0.0",
+		"@typescript-eslint/eslint-plugin": "^4.19.0",
+		"@typescript-eslint/parser": "^4.19.0",
+		"css-loader": "^5.2.0",
+		"eslint": "^7.23.0",
+		"eslint-config-prettier": "^8.1.0",
+		"eslint-plugin-prettier": "^3.3.1",
+		"html-webpack-plugin": "^5.3.1",
+		"less": "^3.13.1",
+		"less-loader": "^8.0.0",
+		"prettier": "^2.2.1",
+		"source-map-loader": "^2.0.1",
+		"style-loader": "^2.0.0",
+		"ts-loader": "^8.0.18",
+		"ts-node": "^9.1.1",
+		"typescript": "^4.1.2",
+		"webpack": "^5.28.0",
+		"webpack-cli": "^4.6.0",
+		"webpack-dev-server": "^3.11.2"
+	}
+}

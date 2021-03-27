@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "ES6",
+		"module": "CommonJS",
+		"lib": ["ES6", "ES2020.BigInt", "DOM", "ES2017.Object"],
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"strict": false,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true
+	},
+	"exclude": ["./webpack.config.ts"]
+}
