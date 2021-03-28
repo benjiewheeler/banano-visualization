@@ -7,6 +7,7 @@ import "./index.less";
 
 const CACHE_THRESHOLD = 1000 * 60 * 15; // 15 min
 const BANOSHI = BigInt("1000000000000000000000000000");
+const AUTHOR_WALLET = "ban_1p7fno5eksni6scqji1euce5p36ahaheh43qqyzabfo7azaseejyzqoikchk";
 
 type HistoryData = {
 	account: string;
@@ -103,6 +104,7 @@ class Visualizer {
 	copyBtn: HTMLInputElement;
 	svgElem: SVGElement;
 	errorElem: HTMLSpanElement;
+	walletLink: HTMLAnchorElement;
 
 	constructor() {
 		this.hashManager = new URLHashManager();
@@ -112,6 +114,7 @@ class Visualizer {
 		this.copyBtn = document.querySelector(".copy-btn");
 		this.svgElem = document.querySelector(".d3-svg");
 		this.errorElem = document.querySelector(".error .message");
+		this.walletLink = document.querySelector(".wallet-link");
 
 		window.addEventListener("resize", () => this.resizeCanvas());
 
@@ -122,6 +125,7 @@ class Visualizer {
 		});
 		this.submitBtn.addEventListener("click", () => this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, this.inputElem.value));
 		this.copyBtn.addEventListener("click", () => this.setClipboard(location.href));
+		this.walletLink.addEventListener("click", () => this.setClipboard(AUTHOR_WALLET));
 
 		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => this.selectAccount(e.detail));
 
@@ -349,13 +353,7 @@ class Visualizer {
 			.force("x", d3.forceX())
 			.force("y", d3.forceY());
 
-		const link = svg
-			.append("g")
-			.attr("fill", "none")
-			.selectAll("path")
-			.data(links)
-			.join("path")
-			.attr("stroke-width", d => Math.log2(d.value) || 1.5);
+		const link = svg.append("g").attr("fill", "none").selectAll("path").data(links).join("path").attr("stroke-width", 1.5);
 
 		const node = svg
 			.append("g")
@@ -370,10 +368,35 @@ class Visualizer {
 			.on("dblclick", (e, n: SimulationNodeDatum) => this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, graph.nodes[n.index].id))
 			// @ts-ignore
 			.call(drag(simulation));
-		node.append("circle").attr("r", 10);
+		node.append("circle").attr("r", (d: D3Node) => {
+			if (graph.nodes[d.index].id === selfAccount) {
+				return 15;
+			}
+			return (
+				Math.log2(
+					_(graph.links)
+						.filter(l => l.value > 0)
+						.filter(l => l.target === graph.nodes[d.index].id)
+						.first()?.value || 10
+				) || 10
+			);
+		});
 		node.append("text")
 			.attr("text-anchor", "middle")
-			.attr("y", 25)
+			.attr("y", (d: D3Node) => {
+				if (graph.nodes[d.index].id === selfAccount) {
+					return 15 + 15;
+				}
+				return (
+					15 +
+					(Math.log2(
+						_(graph.links)
+							.filter(l => l.value > 0)
+							.filter(l => l.target === graph.nodes[d.index].id)
+							.first()?.value || 10
+					) || 10)
+				);
+			})
 			.text(d => (d.id === selfAccount ? "Me" : this.abbreviateAccount(d.id)))
 			.lower()
 			.attr("fill", "white")

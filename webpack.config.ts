@@ -20,7 +20,7 @@ const config: webpack.Configuration = {
 	},
 	plugins: [
 		new HtmlWebPackPlugin({
-			inject: "body",
+			inject: "head",
 			cache: true,
 			favicon: "./src/graph.png",
 			minify: false,
