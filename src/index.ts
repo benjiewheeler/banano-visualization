@@ -2,6 +2,7 @@
 import * as d3 from "d3";
 import { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 import _ from "lodash";
+import qs from "querystring";
 import "./index.less";
 
 const CACHE_THRESHOLD = 1000 * 60 * 15; // 15 min
@@ -41,28 +42,92 @@ interface LoaderConfig {
 	height: number;
 }
 
+interface HashParams {
+	account?: string;
+	[key: string]: string | number | (string | number)[];
+}
+
+class URLHashManager {
+	public static ACCOUNT_CHANGE_EVENT = "account_changed";
+	public static ACCOUNT_PARAM = "account";
+
+	constructor() {
+		window.addEventListener("hashchange", e => this.handleChange(e.oldURL, e.newURL));
+	}
+
+	private handleChange(oldURL: string, newURL: string, forceEvent = false): void {
+		const fromData = this.readHash(new URL(oldURL).hash);
+		const toData = this.readHash(new URL(newURL).hash);
+
+		if (toData?.account !== fromData?.account || forceEvent) {
+			dispatchEvent(new CustomEvent(URLHashManager.ACCOUNT_CHANGE_EVENT, { detail: toData?.account }));
+		}
+	}
+
+	readHash(hash: string = location.hash): HashParams {
+		if (!hash || !hash.length) return {};
+		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
+		const data = qs.parse(hash);
+		return data;
+	}
+
+	getHashParam(name: string, hash: string = location.hash): string {
+		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
+		const data = qs.parse(hash);
+		const value = data[name];
+		console.log(name, hash, data, value);
+		if (!value) return null;
+		return value.toString();
+	}
+
+	setHashParam(name: string, value: string): void {
+		let hash = location.hash;
+		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
+		const data = qs.parse(hash);
+		data[name] = value;
+		location.hash = qs.stringify(data);
+		this.handleChange(location.hash, `#${qs.stringify(data)}`, true);
+	}
+
+	setHash(args: { [name: string]: string | number }): void {
+		location.hash = qs.stringify(args);
+	}
+}
+
 class Visualizer {
+	hashManager: URLHashManager;
 	inputElem: HTMLInputElement;
 	submitBtn: HTMLInputElement;
 	svgElem: SVGElement;
 	errorElem: HTMLSpanElement;
 
 	constructor() {
+		this.hashManager = new URLHashManager();
+
 		this.inputElem = document.querySelector(".account-input");
 		this.submitBtn = document.querySelector(".account-submit");
 		this.svgElem = document.querySelector(".d3-svg");
 		this.errorElem = document.querySelector(".error .message");
 
-		this.svgElem.setAttribute("width", `${this.svgElem.parentElement.clientWidth}px`);
-		this.svgElem.setAttribute("height", `${this.svgElem.parentElement.clientHeight}px`);
+		this.resizeCanvas();
+
+		window.addEventListener("resize", () => this.resizeCanvas());
 
 		this.inputElem.addEventListener("keypress", e => {
 			if (e.key === "Enter") {
 				this.submitBtn.click();
 			}
 		});
-		this.submitBtn.addEventListener("click", () => this.selectAccount(this.inputElem.value));
-		window.addEventListener("resize", () => this.resizeCanvas());
+		this.submitBtn.addEventListener("click", () => this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, this.inputElem.value));
+
+		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => this.selectAccount(e.detail));
+
+		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
+		console.log(account);
+
+		if (account) {
+			this.selectAccount(account);
+		}
 	}
 
 	resizeCanvas(): void {
@@ -145,6 +210,10 @@ class Visualizer {
 				this.handleError(data.error);
 				return;
 			}
+			if (!Array.isArray(data.history)) {
+				throw new Error("history is not an array");
+			}
+
 			this.saveResponse(data);
 			this.drawTransactions(account, data);
 		} catch (error) {
@@ -285,7 +354,7 @@ class Visualizer {
 			.join("g")
 			.attr("class", d => (d.id === selfAccount ? "self" : "other"))
 			// @ts-ignore
-			.on("dblclick", (e, n: SimulationNodeDatum) => this.selectAccount(graph.nodes[n.index].id))
+			.on("dblclick", (e, n: SimulationNodeDatum) => this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, graph.nodes[n.index].id))
 			// @ts-ignore
 			.call(drag(simulation));
 		node.append("circle").attr("r", 10);
