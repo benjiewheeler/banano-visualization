@@ -1,6 +1,11 @@
 [build]
   publish =  "dist/"
-  command = "npm run build.prod"
+  command = "yarn run build.prod"
 
 [context.production]
   environment = { }
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=21600"
