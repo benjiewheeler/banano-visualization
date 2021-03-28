@@ -3,18 +3,35 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Banano transaction graph</title>
+		<title>Banano wallet buddies</title>
 	</head>
 	<body>
+		<div class="header">
+			<h1>Banano wallet buddies</h1>
+			<span class="description">View the transactions network between your wallet and other wallets in your last 1000 transactions</span>
+		</div>
 		<div class="controls">
-			<input type="text" class="account-input" placeholder="ban_1..." />
-			<input type="submit" class="account-submit" value="LOAD" />
+			<div class="line">
+				<input type="text" class="account-input" placeholder="ban_1..." />
+				<input type="submit" class="account-submit" value="LOAD" />
+			</div>
+			<div class="line">
+				<input type="submit" class="copy-btn" value="Copy link to graph" />
+			</div>
 		</div>
 		<div class="error">
 			<span class="message"></span>
 		</div>
 		<div class="canvas">
 			<svg class="d3-svg"></svg>
+		</div>
+		<div class="footer">
+			<div class="credit">
+				<span>Made by </span>
+				<a class="discord-link" target="_blank">Benjie#5458</a>
+				<span> | </span>
+				<a href="https://github.com/benjiewheeler" class="github-link" target="_blank">benjiewheeler</a>
+			</div>
 		</div>
 	</body>
 </html>

@@ -11,6 +11,7 @@ const config: webpack.Configuration = {
 		rules: [
 			{ test: /\.ts$/, use: ["ts-loader"] },
 			{ test: /\.less$/i, use: ["style-loader", "css-loader", "less-loader"] },
+			{ test: /\.(png|ico)$/, use: ["file-loader"] },
 			{ test: /\.js$/, enforce: "pre", use: ["source-map-loader"] },
 		],
 	},
@@ -21,6 +22,7 @@ const config: webpack.Configuration = {
 		new HtmlWebPackPlugin({
 			inject: "body",
 			cache: true,
+			favicon: "./src/graph.png",
 			minify: false,
 			template: "./src/index.html",
 			filename: "./index.html",

@@ -75,18 +75,20 @@ class URLHashManager {
 		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
 		const data = qs.parse(hash);
 		const value = data[name];
-		console.log(name, hash, data, value);
 		if (!value) return null;
 		return value.toString();
 	}
 
 	setHashParam(name: string, value: string): void {
+		if (this.getHashParam(name) === value) {
+			this.handleChange(location.hash, `#${location.hash}`, true);
+			return;
+		}
 		let hash = location.hash;
 		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
 		const data = qs.parse(hash);
 		data[name] = value;
 		location.hash = qs.stringify(data);
-		this.handleChange(location.hash, `#${qs.stringify(data)}`, true);
 	}
 
 	setHash(args: { [name: string]: string | number }): void {
@@ -98,6 +100,7 @@ class Visualizer {
 	hashManager: URLHashManager;
 	inputElem: HTMLInputElement;
 	submitBtn: HTMLInputElement;
+	copyBtn: HTMLInputElement;
 	svgElem: SVGElement;
 	errorElem: HTMLSpanElement;
 
@@ -106,10 +109,9 @@ class Visualizer {
 
 		this.inputElem = document.querySelector(".account-input");
 		this.submitBtn = document.querySelector(".account-submit");
+		this.copyBtn = document.querySelector(".copy-btn");
 		this.svgElem = document.querySelector(".d3-svg");
 		this.errorElem = document.querySelector(".error .message");
-
-		this.resizeCanvas();
 
 		window.addEventListener("resize", () => this.resizeCanvas());
 
@@ -119,18 +121,29 @@ class Visualizer {
 			}
 		});
 		this.submitBtn.addEventListener("click", () => this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, this.inputElem.value));
+		this.copyBtn.addEventListener("click", () => this.setClipboard(location.href));
 
 		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => this.selectAccount(e.detail));
 
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
-		console.log(account);
 
 		if (account) {
 			this.selectAccount(account);
 		}
 	}
 
+	setClipboard(value: string): void {
+		const elem = document.createElement("input");
+		elem.classList.add("copy-elem");
+		elem.value = value;
+		document.body.appendChild(elem);
+		elem.select();
+		document.execCommand("copy");
+		document.body.removeChild(elem);
+	}
+
 	resizeCanvas(): void {
+		this.svgElem.parentElement.classList.add("fullsize");
 		this.svgElem.setAttribute("width", `${this.svgElem.parentElement.clientWidth}px`);
 		this.svgElem.setAttribute("height", `${this.svgElem.parentElement.clientHeight}px`);
 
@@ -175,18 +188,18 @@ class Visualizer {
 	}
 
 	async selectAccount(account: string): Promise<void> {
-		document.documentElement.scrollTop = this.svgElem.parentElement.offsetTop;
-
 		this.inputElem.value = account;
 		await this.fetchAccountHistory(account);
 	}
 
 	async fetchAccountHistory(account: string): Promise<void> {
 		this.clearError();
+		this.copyBtn.classList.remove("visible");
 		this.drawLoader({ width: 100, height: 100 });
 
 		const cacheItem = this.retrieveCache(account);
 		if (cacheItem) {
+			this.copyBtn.classList.add("visible");
 			this.drawTransactions(account, cacheItem.data);
 			return;
 		}
@@ -215,6 +228,7 @@ class Visualizer {
 			}
 
 			this.saveResponse(data);
+			this.copyBtn.classList.add("visible");
 			this.drawTransactions(account, data);
 		} catch (error) {
 			this.clearCanvas();
@@ -314,7 +328,6 @@ class Visualizer {
 			links: this.getLinks(data),
 			nodes: this.getNodes(data),
 		};
-		console.log(graph);
 
 		if (graph.nodes.length > 100) {
 			const goAhead = confirm(

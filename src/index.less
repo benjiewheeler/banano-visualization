@@ -7,38 +7,93 @@ body {
     overflow-x      : hidden;
 }
 
-.controls {
-    padding        : 1em;
-    display        : flex;
-    justify-content: center;
+.copy-elem {
+    display : inline-block;
+    position: absolute;
+    left    : -1000px;
+    top     : -1000px;
+}
 
-    .account-input {
-        background-color: #2f2f2d;
-        padding         : 1em;
-        border          : none;
-        border-radius   : 20px 0 0 20px;
-        max-width       : 70%;
-        width           : 3400px;
-        color           : #d2d2d0;
-        font-family     : @font;
-        outline         : none;
+.header {
+    display  : flex;
+    flex-flow: column;
 
-        &:focus {
-            box-shadow: 0 0 2px 0 #ffc107;
-        }
+    h1 {
+        text-align: center;
+        margin    : 0;
+        padding   : 0.5em;
+        color     : #ffc107;
     }
 
-    .account-submit {
-        background-color: #ffc107;
-        padding         : 1em;
-        border          : none;
-        border-radius   : 0 20px 20px 0;
-        max-width       : 70%;
-        color           : #151514;
-        font-family     : @font;
-        outline         : none;
-        cursor          : pointer;
-        font-weight     : bold;
+    .description {
+        text-align: center;
+        margin    : 0;
+        padding   : 1em;
+        color     : #d2d2d0;
+    }
+}
+
+.controls {
+    display  : flex;
+    flex-flow: column;
+
+    .line {
+        padding        : 1em;
+        display        : flex;
+        flex-flow      : row;
+        justify-content: center;
+
+        .account-input {
+            background-color: #2f2f2d;
+            padding         : 1em;
+            border          : none;
+            border-radius   : 20px 0 0 20px;
+            max-width       : 70%;
+            width           : 3400px;
+            color           : #d2d2d0;
+            font-family     : @font;
+            outline         : none;
+
+            &:focus {
+                box-shadow: 0 0 2px 0 #ffc107;
+            }
+        }
+
+        .account-submit {
+            background-color: #ffc107;
+            padding         : 1em;
+            border          : none;
+            border-radius   : 0 20px 20px 0;
+            max-width       : 70%;
+            color           : #151514;
+            font-family     : @font;
+            outline         : none;
+            cursor          : pointer;
+            font-weight     : bold;
+        }
+
+        .copy-btn {
+            display      : none;
+            border       : none;
+            background   : none;
+            color        : #ffc107;
+            cursor       : pointer;
+            outline      : none;
+            padding      : 1em;
+            border-radius: 24px;
+
+            &.visible {
+                display: flex;
+            }
+
+            &:hover {
+                box-shadow: 0 0 2px 0 #ffc107;
+            }
+
+            &:active {
+                background-color: #ffc1071a;
+            }
+        }
     }
 }
 
@@ -53,10 +108,17 @@ body {
 }
 
 .canvas {
-    height: calc(100vh - 100px);
+    margin         : 0 1em;
+    display        : flex;
+    justify-content: center;
+
+    &.fullsize {
+        height: calc(100vh - 100px);
+    }
 
     svg {
         user-select: none;
+        box-shadow : 0 0 2px 0 #d2d2d01a;
 
         g {
             &.self {
@@ -76,6 +138,47 @@ body {
                 stroke        : #ffc107;
                 stroke-linecap: round;
             }
+        }
+    }
+}
+
+
+.footer {
+    display    : flex;
+    flex-flow  : column;
+    align-items: center;
+
+    .credit {
+        width     : 80%;
+        border-top: 1px solid #d2d2d01a;
+        padding   : 1em;
+        text-align: center;
+
+        span,
+        a {
+            color      : #d2d2d0;
+            font-size  : 13px;
+            text-align : center;
+            line-height: 175%;
+            align-self : center;
+        }
+
+        .credit span,
+        .credit a {
+            color      : #d2d2d0;
+            font-size  : 13px;
+            text-align : center;
+            line-height: 175%;
+            align-self : center;
+        }
+
+        .discord-link {
+            font-weight: bold;
+            color      : #7289da;
+        }
+
+        .github-link {
+            font-weight: bold;
         }
     }
 }
