@@ -2,99 +2,20 @@
 import * as d3 from "d3";
 import { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 import _ from "lodash";
-import qs from "querystring";
-import "./index.less";
+import "../style/force.less";
+import { AUTHOR_WALLET, BANOSHI } from "./constants";
+import { APIResponse, LoaderConfig } from "./types";
+import { URLHashManager } from "./URLHashManager";
+import { abbreviateAccount, fetchAccountHistory, setClipboard } from "./utils";
 
-const CACHE_THRESHOLD = 1000 * 60 * 15; // 15 min
-const BANOSHI = BigInt("1000000000000000000000000000");
-const AUTHOR_WALLET = "ban_1p7fno5eksni6scqji1euce5p36ahaheh43qqyzabfo7azaseejyzqoikchk";
-
-type HistoryData = {
-	account: string;
-	amount: string;
-};
-
-type BananoData = {
-	account: string;
-	history: HistoryData[];
-};
-
-type ErrorResponse = {
-	error: string;
-};
-
-interface D3Node extends SimulationNodeDatum {
+export interface D3Node extends SimulationNodeDatum {
 	id: string;
 }
 
-interface D3Link extends SimulationLinkDatum<D3Node> {
+export interface D3Link extends SimulationLinkDatum<D3Node> {
 	source: string;
 	target: string;
 	value: number;
-}
-
-interface CacheItem {
-	data: BananoData;
-	timestamp: number;
-}
-
-interface LoaderConfig {
-	width: number;
-	height: number;
-}
-
-interface HashParams {
-	account?: string;
-	[key: string]: string | number | (string | number)[];
-}
-
-class URLHashManager {
-	public static ACCOUNT_CHANGE_EVENT = "account_changed";
-	public static ACCOUNT_PARAM = "account";
-
-	constructor() {
-		window.addEventListener("hashchange", e => this.handleChange(e.oldURL, e.newURL));
-	}
-
-	private handleChange(oldURL: string, newURL: string, forceEvent = false): void {
-		const fromData = this.readHash(new URL(oldURL).hash);
-		const toData = this.readHash(new URL(newURL).hash);
-
-		if (toData?.account !== fromData?.account || forceEvent) {
-			dispatchEvent(new CustomEvent(URLHashManager.ACCOUNT_CHANGE_EVENT, { detail: toData?.account }));
-		}
-	}
-
-	readHash(hash: string = location.hash): HashParams {
-		if (!hash || !hash.length) return {};
-		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
-		const data = qs.parse(hash);
-		return data;
-	}
-
-	getHashParam(name: string, hash: string = location.hash): string {
-		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
-		const data = qs.parse(hash);
-		const value = data[name];
-		if (!value) return null;
-		return value.toString();
-	}
-
-	setHashParam(name: string, value: string): void {
-		if (this.getHashParam(name) === value) {
-			this.handleChange(location.hash, `#${location.hash}`, true);
-			return;
-		}
-		let hash = location.hash;
-		if (hash.charCodeAt(0) === 35) hash = hash.substr(1);
-		const data = qs.parse(hash);
-		data[name] = value;
-		location.hash = qs.stringify(data);
-	}
-
-	setHash(args: { [name: string]: string | number }): void {
-		location.hash = qs.stringify(args);
-	}
 }
 
 class Visualizer {
@@ -124,8 +45,8 @@ class Visualizer {
 			}
 		});
 		this.submitBtn.addEventListener("click", () => this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, this.inputElem.value));
-		this.copyBtn.addEventListener("click", () => this.setClipboard(location.href));
-		this.walletLink.addEventListener("click", () => this.setClipboard(AUTHOR_WALLET));
+		this.copyBtn.addEventListener("click", () => setClipboard(location.href));
+		this.walletLink.addEventListener("click", () => setClipboard(AUTHOR_WALLET));
 
 		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => this.selectAccount(e.detail));
 
@@ -134,16 +55,6 @@ class Visualizer {
 		if (account) {
 			this.selectAccount(account);
 		}
-	}
-
-	setClipboard(value: string): void {
-		const elem = document.createElement("input");
-		elem.classList.add("copy-elem");
-		elem.value = value;
-		document.body.appendChild(elem);
-		elem.select();
-		document.execCommand("copy");
-		document.body.removeChild(elem);
 	}
 
 	resizeCanvas(): void {
@@ -160,29 +71,6 @@ class Visualizer {
 		]);
 	}
 
-	abbreviateAccount(account: string): string {
-		const prefix = account.substring(0, 9);
-		const suffix = account.substring(account.length - 5, account.length);
-
-		return `${prefix}...${suffix}`;
-	}
-
-	saveResponse(data: BananoData): void {
-		const cacheItem: CacheItem = { data, timestamp: Date.now() };
-		localStorage.setItem(data.account, JSON.stringify(cacheItem));
-	}
-
-	retrieveCache(account: string): CacheItem {
-		const savedData = localStorage.getItem(account);
-		if (savedData) {
-			const cacheItem: CacheItem = JSON.parse(savedData);
-			if (Date.now() - cacheItem.timestamp < CACHE_THRESHOLD) {
-				return cacheItem;
-			}
-		}
-		return null;
-	}
-
 	clearError(): void {
 		this.errorElem.innerText = "";
 	}
@@ -193,35 +81,16 @@ class Visualizer {
 
 	async selectAccount(account: string): Promise<void> {
 		this.inputElem.value = account;
-		await this.fetchAccountHistory(account);
+		await this.getAccountHistory(account);
 	}
 
-	async fetchAccountHistory(account: string): Promise<void> {
+	async getAccountHistory(account: string): Promise<void> {
 		this.clearError();
 		this.copyBtn.classList.remove("visible");
 		this.drawLoader({ width: 100, height: 100 });
 
-		const cacheItem = this.retrieveCache(account);
-		if (cacheItem) {
-			this.copyBtn.classList.add("visible");
-			this.drawTransactions(account, cacheItem.data);
-			return;
-		}
 		try {
-			const response = await fetch("https://kaliumapi.appditto.com/api", {
-				headers: {
-					"content-type": "application/json",
-					"sec-fetch-dest": "empty",
-					"sec-fetch-mode": "cors",
-					"sec-fetch-site": "cross-site",
-				},
-				body: JSON.stringify({ action: "account_history", account, count: 1000, raw: false }),
-				method: "POST",
-				mode: "cors",
-				credentials: "omit",
-			});
-
-			const data: BananoData & ErrorResponse = await response.json();
+			const data: APIResponse = await fetchAccountHistory(account);
 			if (data.error) {
 				this.clearCanvas();
 				this.handleError(data.error);
@@ -231,7 +100,6 @@ class Visualizer {
 				throw new Error("history is not an array");
 			}
 
-			this.saveResponse(data);
 			this.copyBtn.classList.add("visible");
 			this.drawTransactions(account, data);
 		} catch (error) {
@@ -240,7 +108,7 @@ class Visualizer {
 		}
 	}
 
-	getNodes(data: BananoData): D3Node[] {
+	getNodes(data: APIResponse): D3Node[] {
 		const history = _(data.history)
 			.map("account")
 			.uniq()
@@ -250,7 +118,7 @@ class Visualizer {
 		return [{ id: data.account }, ...history];
 	}
 
-	getLinks(data: BananoData): D3Link[] {
+	getLinks(data: APIResponse): D3Link[] {
 		const output: { [target: string]: D3Link } = {};
 
 		data.history.forEach(tx => {
@@ -288,6 +156,7 @@ class Visualizer {
 			.datum({ endAngle: 0.33 * tau })
 			.style("fill", "#4D4D4D")
 			.attr("d", arc)
+			.attr("stroke-linecap", "round")
 			.attr("transform", `translate(${this.svgElem.clientWidth / 2} ${this.svgElem.clientHeight / 2})`)
 			.call(spin, 1500);
 
@@ -302,7 +171,7 @@ class Visualizer {
 		}
 	}
 
-	drawTransactions(selfAccount: string, data: BananoData): void {
+	drawTransactions(selfAccount: string, data: APIResponse): void {
 		const svg = d3.select(this.svgElem);
 		this.resizeCanvas();
 		this.clearCanvas();
@@ -397,7 +266,7 @@ class Visualizer {
 					) || 10)
 				);
 			})
-			.text(d => (d.id === selfAccount ? "Me" : this.abbreviateAccount(d.id)))
+			.text(d => (d.id === selfAccount ? "Me" : abbreviateAccount(d.id)))
 			.lower()
 			.attr("fill", "white")
 			.attr("stroke", "none");

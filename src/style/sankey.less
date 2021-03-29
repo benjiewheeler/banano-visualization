@@ -1,0 +1,25 @@
+@import "./common.less";
+
+.canvas {
+    &.fullsize {
+        height: calc(180vh - 100px);
+    }
+
+    svg {
+        g {
+            .link {
+                fill          : none;
+                stroke        : #d2d2d0;
+                stroke-opacity: .1;
+
+                &:hover {
+                    stroke-opacity: .2;
+                }
+            }
+
+            .node {
+                cursor: pointer;
+            }
+        }
+    }
+}

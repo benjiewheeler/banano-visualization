@@ -1,0 +1,30 @@
+@import "./common.less";
+
+
+.links {
+    display  : flex;
+    flex-flow: row wrap;
+
+    .nav-link {
+        display        : flex;
+        flex-flow      : column;
+        padding        : 1em;
+        border-radius  : 1em;
+        margin         : 1em;
+        text-decoration: none;
+
+        &:hover {
+            box-shadow: 0 0 2px 0 #FBDD11;
+        }
+
+        img {
+            max-width: 128px;
+        }
+
+        span {
+            text-align: center;
+            color     : #d2d2d0;
+            margin-top: 1em;
+        }
+    }
+}

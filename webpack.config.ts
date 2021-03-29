@@ -3,7 +3,11 @@ import path from "path";
 import webpack from "webpack";
 
 const config: webpack.Configuration = {
-	entry: "./src/index.ts",
+	entry: {
+		index: "./src/scripts/index.ts",
+		force: "./src/scripts/force.ts",
+		sankey: "./src/scripts/sankey.ts",
+	},
 	output: {
 		path: path.resolve(__dirname, "./dist"),
 	},
@@ -11,21 +15,43 @@ const config: webpack.Configuration = {
 		rules: [
 			{ test: /\.ts$/, use: ["ts-loader"] },
 			{ test: /\.less$/i, use: ["style-loader", "css-loader", "less-loader"] },
-			{ test: /\.(png|ico)$/, use: ["file-loader"] },
+			{ test: /\.html$/i, use: ["html-loader"] },
 			{ test: /\.js$/, enforce: "pre", use: ["source-map-loader"] },
 		],
 	},
 	resolve: {
-		extensions: [".html", ".css", ".js", ".ts"],
+		extensions: [".html", ".css", ".js", ".ts", ".png"],
 	},
 	plugins: [
 		new HtmlWebPackPlugin({
-			inject: "head",
 			cache: true,
-			favicon: "./src/graph.png",
-			minify: false,
-			template: "./src/index.html",
+			chunks: ["index"],
+			favicon: "./src/images/favicon.png",
 			filename: "./index.html",
+			inject: "head",
+			minify: false,
+			scriptLoading: "blocking",
+			template: "./src/html/index.html",
+		}),
+		new HtmlWebPackPlugin({
+			cache: true,
+			chunks: ["sankey"],
+			favicon: "./src/images/favicon.png",
+			filename: "./sankey.html",
+			inject: "head",
+			minify: false,
+			scriptLoading: "blocking",
+			template: "./src/html/sankey.html",
+		}),
+		new HtmlWebPackPlugin({
+			cache: true,
+			chunks: ["force"],
+			favicon: "./src/images/favicon.png",
+			filename: "./force.html",
+			inject: "head",
+			minify: false,
+			scriptLoading: "blocking",
+			template: "./src/html/force.html",
 		}),
 	],
 	watchOptions: {

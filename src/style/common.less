@@ -3,7 +3,7 @@
 body {
     margin          : 0;
     font-family     : @font;
-    background-color: #151514;
+    background-color: #2A2A2E;
     overflow-x      : hidden;
 }
 
@@ -14,6 +14,22 @@ body {
     top     : -1000px;
 }
 
+.top-bar {
+    display      : flex;
+    flex-flow    : row;
+    border-bottom: 1px solid #d2d2d01a;
+
+    .nav-link {
+        text-decoration: none;
+        color          : #FBDD11;
+        padding        : 1em;
+
+        &:hover {
+            background-color: #fbdd111a;
+        }
+    }
+}
+
 .header {
     display  : flex;
     flex-flow: column;
@@ -22,7 +38,7 @@ body {
         text-align: center;
         margin    : 0;
         padding   : 0.5em;
-        color     : #ffc107;
+        color     : #FBDD11;
     }
 
     .description {
@@ -44,7 +60,7 @@ body {
         justify-content: center;
 
         .account-input {
-            background-color: #2f2f2d;
+            background-color: #212124;
             padding         : 1em;
             border          : none;
             border-radius   : 20px 0 0 20px;
@@ -55,12 +71,12 @@ body {
             outline         : none;
 
             &:focus {
-                box-shadow: 0 0 2px 0 #ffc107;
+                box-shadow: 0 0 2px 0 #FBDD11;
             }
         }
 
         .account-submit {
-            background-color: #ffc107;
+            background-color: #FBDD11;
             padding         : 1em;
             border          : none;
             border-radius   : 0 20px 20px 0;
@@ -76,7 +92,7 @@ body {
             display      : none;
             border       : none;
             background   : none;
-            color        : #ffc107;
+            color        : #FBDD11;
             cursor       : pointer;
             outline      : none;
             padding      : 1em;
@@ -87,11 +103,11 @@ body {
             }
 
             &:hover {
-                box-shadow: 0 0 2px 0 #ffc107;
+                box-shadow: 0 0 2px 0 #FBDD11;
             }
 
             &:active {
-                background-color: #ffc1071a;
+                background-color: #FBDD111a;
             }
         }
     }
@@ -119,26 +135,6 @@ body {
     svg {
         user-select: none;
         box-shadow : 0 0 2px 0 #d2d2d01a;
-
-        g {
-            &.self {
-                circle {
-                    fill: #e91e63;
-                }
-            }
-
-            circle {
-                cursor      : pointer;
-                stroke-width: 1.5;
-                stroke      : #fff;
-                fill        : #2196f3;
-            }
-
-            path {
-                stroke        : #ffc107;
-                stroke-linecap: round;
-            }
-        }
     }
 }
 
@@ -165,7 +161,7 @@ body {
 
         .wallet-link {
             background: none;
-            color     : #ffc107;
+            color     : #FBDD11;
             cursor    : pointer;
         }
     }
