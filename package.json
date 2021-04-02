@@ -7,6 +7,7 @@
 	"license": "MIT",
 	"private": true,
 	"scripts": {
+		"build.func": "tsc -p ./tsconfig.backend.json",
 		"build.dev": "webpack --progress --cache --mode development",
 		"build.prod": "webpack --cache --mode production",
 		"build.watch": "webpack serve --progress --hot --mode development"
@@ -17,6 +18,7 @@
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
+		"@types/aws-lambda": "^8.10.73",
 		"@types/d3": "^6.3.0",
 		"@types/d3-sankey": "^0.11.1",
 		"@types/lodash": "^4.14.168",

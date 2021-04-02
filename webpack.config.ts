@@ -13,7 +13,7 @@ const config: webpack.Configuration = {
 	},
 	module: {
 		rules: [
-			{ test: /\.ts$/, use: ["ts-loader"] },
+			{ test: /\.ts$/, loader: "ts-loader", options: { configFile: "./tsconfig.frontend.json" } },
 			{ test: /\.less$/i, use: ["style-loader", "css-loader", "less-loader"] },
 			{ test: /\.html$/i, use: ["html-loader"] },
 			{ test: /\.js$/, enforce: "pre", use: ["source-map-loader"] },

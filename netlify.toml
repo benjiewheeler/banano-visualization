@@ -1,6 +1,7 @@
 [build]
   publish =  "dist/"
-  command = "yarn run build.prod"
+  command = "yarn run build.func && yarn run build.prod"
+  functions = "functions"
 
 [context.production]
   environment = { }

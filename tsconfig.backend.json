@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "CommonJS",
+		"lib": ["DOM"],
+		"outDir": "./functions",
+		"rootDir": "./src/backend",
+		"strict": false,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true
+	},
+	"exclude": ["./webpack.config.ts", "./src/frontend"]
+}

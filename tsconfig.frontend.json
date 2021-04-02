@@ -4,10 +4,10 @@
 		"module": "CommonJS",
 		"lib": ["ES6", "ES2020.BigInt", "DOM", "ES2017.Object"],
 		"outDir": "./dist",
-		"rootDir": "./src",
+		"rootDir": "./src/frontend",
 		"strict": false,
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true
 	},
-	"exclude": ["./webpack.config.ts"]
+	"exclude": ["./webpack.config.ts", "./src/backend"]
 }
