@@ -9,7 +9,7 @@
 	"parser": "@typescript-eslint/parser",
 	"plugins": ["@typescript-eslint", "@typescript-eslint/eslint-plugin", "prettier"],
 	"parserOptions": {
-		"project": ["./tsconfig.frontend.json", "./tsconfig.backend.json"],
+		"project": ["./tsconfig.json", "./tsconfig.frontend.json", "./tsconfig.backend.json"],
 		"ecmaVersion": 6,
 		"sourceType": "module"
 	}
