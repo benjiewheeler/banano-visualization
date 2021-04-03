@@ -6,11 +6,6 @@
 [context.production]
   environment = { }
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Cache-Control = "public, max-age=21600"
-
 [[redirects]]
   from = "/api"
   to = "/.netlify/functions/api"
