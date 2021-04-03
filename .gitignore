@@ -117,3 +117,6 @@ dist
 
 # Local Netlify folder
 .netlify
+
+accounts.json
+functions/

@@ -7,6 +7,7 @@ const config: webpack.Configuration = {
 		index: "./src/frontend/scripts/index.ts",
 		force: "./src/frontend/scripts/force.ts",
 		sankey: "./src/frontend/scripts/sankey.ts",
+		botwatch: "./src/frontend/scripts/botwatch.ts",
 	},
 	output: {
 		path: path.resolve(__dirname, "./dist"),
@@ -52,6 +53,16 @@ const config: webpack.Configuration = {
 			minify: false,
 			scriptLoading: "blocking",
 			template: "./src/frontend/html/force.html",
+		}),
+		new HtmlWebPackPlugin({
+			cache: true,
+			chunks: ["botwatch"],
+			favicon: "./src/frontend/images/favicon.png",
+			filename: "./botwatch.html",
+			inject: "head",
+			minify: false,
+			scriptLoading: "blocking",
+			template: "./src/frontend/html/botwatch.html",
 		}),
 	],
 	watchOptions: {

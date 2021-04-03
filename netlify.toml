@@ -1,6 +1,6 @@
 [build]
   publish =  "dist/"
-  command = "yarn run build.func && yarn run build.prod"
+  command = "sh netlify-build.sh"
   functions = "functions"
 
 [context.production]
@@ -10,3 +10,8 @@
   for = "/*"
   [headers.values]
     Cache-Control = "public, max-age=21600"
+
+[[redirects]]
+  from = "/api"
+  to = "/.netlify/functions/api"
+  status = 200

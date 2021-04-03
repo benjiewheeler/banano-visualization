@@ -2,15 +2,16 @@
 
 
 .links {
-    display  : flex;
-    flex-flow: row wrap;
+    display        : flex;
+    flex-flow      : row wrap;
+    justify-content: center;
 
     .nav-link {
         display        : flex;
         flex-flow      : column;
-        padding        : 1em;
+        padding        : 0.5em;
         border-radius  : 1em;
-        margin         : 1em;
+        margin         : 0.5em;
         text-decoration: none;
 
         &:hover {
@@ -18,7 +19,8 @@
         }
 
         img {
-            max-width: 128px;
+            max-width: 96px;
+            margin   : 0 auto;
         }
 
         span {
