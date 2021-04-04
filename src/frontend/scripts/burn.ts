@@ -52,18 +52,20 @@ class Visualizer {
 	}
 
 	async selectAccount(account: string): Promise<void> {
+		this.copyBtn.classList.remove("visible");
+		this.mainElem.classList.add("loading");
+
+		this.inputElem.value = account;
+
 		if (!this.price) {
 			this.price = await fetchBananoPrice();
 		}
 
-		this.inputElem.value = account;
 		await this.getAccountHistory(account);
 	}
 
 	async getAccountHistory(account: string): Promise<void> {
 		this.clearError();
-		this.copyBtn.classList.remove("visible");
-		this.mainElem.classList.add("loading");
 
 		try {
 			const data: APIResponse = await fetchAccountHistory(account);

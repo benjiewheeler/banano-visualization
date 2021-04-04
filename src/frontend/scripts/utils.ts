@@ -1,5 +1,5 @@
-import { CACHE_THRESHOLD } from "./constants";
-import { APIResponse, CacheItem, CoinGeckoAPIResponse } from "./types";
+import { CACHE_THRESHOLD, PRICE_STORAGE_KEY } from "./constants";
+import { APIResponse, CacheItem, CoinGeckoAPIResponse, PriceCacheItem } from "./types";
 
 export function setClipboard(value: string): void {
 	const elem = document.createElement("input");
@@ -41,15 +41,23 @@ export async function fetchAccountHistory(account: string): Promise<APIResponse>
 	}
 
 	try {
-		const response = await fetch("https://kaliumapi.appditto.com/api", {
+		const url = new URL(location.href);
+		url.hash = null;
+		url.search = "";
+		url.pathname = "/node";
+		url.searchParams.append("action", "account_history");
+		url.searchParams.append("account", account);
+		url.searchParams.append("count", "2000");
+
+		const response = await fetch(url.toString(), {
 			headers: {
 				"content-type": "application/json",
 				"sec-fetch-dest": "empty",
 				"sec-fetch-mode": "cors",
 				"sec-fetch-site": "cross-site",
 			},
-			body: JSON.stringify({ action: "account_history", account, count: 1000, raw: false }),
-			method: "POST",
+			body: null,
+			method: "GET",
 			mode: "cors",
 			credentials: "omit",
 		});
@@ -63,6 +71,14 @@ export async function fetchAccountHistory(account: string): Promise<APIResponse>
 }
 
 export async function fetchBananoPrice(): Promise<number> {
+	const savedData = localStorage.getItem(PRICE_STORAGE_KEY);
+	if (savedData) {
+		const cacheItem: PriceCacheItem = JSON.parse(savedData);
+		if (Date.now() - cacheItem.timestamp < CACHE_THRESHOLD) {
+			return cacheItem?.data?.banano?.usd;
+		}
+	}
+
 	try {
 		const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=Banano&vs_currencies=usd", {
 			headers: {
@@ -78,6 +94,9 @@ export async function fetchBananoPrice(): Promise<number> {
 		});
 
 		const data: CoinGeckoAPIResponse = await response.json();
+
+		const cacheItem: PriceCacheItem = { data, timestamp: Date.now() };
+		localStorage.setItem(PRICE_STORAGE_KEY, JSON.stringify(cacheItem));
 
 		return data?.banano?.usd;
 	} catch (error) {

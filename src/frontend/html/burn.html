@@ -2,7 +2,8 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 		<title>Banano burn statistics</title>
 	</head>
 	<body>
@@ -10,10 +11,11 @@
 			<a href="/" class="nav-link">Home</a>
 			<a href="/force" class="nav-link">Force Graph</a>
 			<a href="/sankey" class="nav-link">Sankey Graph</a>
+			<a href="/burn" class="nav-link">Banano Burn</a>
 		</div>
 		<div class="header">
 			<h1>Banano burn statistics</h1>
-			<span class="description">Check how much banano you have burnt</span>
+			<span class="description">Check how much banano you have burnt*</span>
 		</div>
 		<div class="controls">
 			<div class="line">
@@ -21,7 +23,7 @@
 				<input type="submit" class="account-submit" value="LOAD" />
 			</div>
 			<div class="line">
-				<input type="submit" class="copy-btn" value="Copy link to graph" />
+				<input type="submit" class="copy-btn" value="Copy link to statistics" />
 			</div>
 		</div>
 		<div class="error">
@@ -33,6 +35,7 @@
 			<span class="usd"></span>
 		</div>
 		<div class="footer">
+			<span class="note">*This tool only checks the last 2000 transactions</span>
 			<div class="potassium-support">
 				<span>You like it ?</span>
 				<span>Send the author some potassium</span>

@@ -30,3 +30,8 @@ export interface CoinGeckoAPIResponse {
 		usd: number;
 	};
 }
+
+export interface PriceCacheItem {
+	data: CoinGeckoAPIResponse;
+	timestamp: number;
+}
