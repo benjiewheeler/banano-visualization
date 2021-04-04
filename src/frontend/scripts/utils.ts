@@ -1,5 +1,5 @@
 import { CACHE_THRESHOLD } from "./constants";
-import { APIResponse, CacheItem } from "./types";
+import { APIResponse, CacheItem, CoinGeckoAPIResponse } from "./types";
 
 export function setClipboard(value: string): void {
 	const elem = document.createElement("input");
@@ -59,5 +59,28 @@ export async function fetchAccountHistory(account: string): Promise<APIResponse>
 		return data;
 	} catch (error) {
 		return { error: "Failed to load transaction history" };
+	}
+}
+
+export async function fetchBananoPrice(): Promise<number> {
+	try {
+		const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=Banano&vs_currencies=usd", {
+			headers: {
+				"accept": "application/json, text/javascript",
+				"sec-fetch-dest": "empty",
+				"sec-fetch-mode": "cors",
+				"sec-fetch-site": "cross-site",
+			},
+			body: null,
+			method: "GET",
+			mode: "cors",
+			credentials: "omit",
+		});
+
+		const data: CoinGeckoAPIResponse = await response.json();
+
+		return data?.banano?.usd;
+	} catch (error) {
+		return null;
 	}
 }

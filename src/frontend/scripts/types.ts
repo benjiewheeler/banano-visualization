@@ -24,3 +24,9 @@ export interface HashParams {
 	account?: string;
 	[key: string]: string | number | (string | number)[];
 }
+
+export interface CoinGeckoAPIResponse {
+	banano: {
+		usd: number;
+	};
+}

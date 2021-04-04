@@ -4,6 +4,7 @@ import webpack from "webpack";
 
 const config: webpack.Configuration = {
 	entry: {
+		burn: "./src/frontend/scripts/burn.ts",
 		index: "./src/frontend/scripts/index.ts",
 		force: "./src/frontend/scripts/force.ts",
 		sankey: "./src/frontend/scripts/sankey.ts",
@@ -33,6 +34,16 @@ const config: webpack.Configuration = {
 			minify: false,
 			scriptLoading: "blocking",
 			template: "./src/frontend/html/index.html",
+		}),
+		new HtmlWebPackPlugin({
+			cache: true,
+			chunks: ["burn"],
+			favicon: "./src/frontend/images/favicon.png",
+			filename: "./burn.html",
+			inject: "head",
+			minify: false,
+			scriptLoading: "blocking",
+			template: "./src/frontend/html/burn.html",
 		}),
 		new HtmlWebPackPlugin({
 			cache: true,

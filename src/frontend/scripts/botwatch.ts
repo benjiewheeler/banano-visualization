@@ -1,5 +1,7 @@
 import async from "async";
 import "../style/botwatch.less";
+import { AUTHOR_WALLET } from "./constants";
+import { fetchBananoPrice, setClipboard } from "./utils";
 
 interface APIResponse {
 	users?: string[];
@@ -8,23 +10,22 @@ interface APIResponse {
 	error?: string;
 }
 
-interface CoinGeckoAPIResponse {
-	banano: {
-		usd: number;
-	};
-}
-
 class Visualizer {
 	users: string[];
 	price: number;
+	walletLink: HTMLAnchorElement;
 
 	constructor() {
+		this.walletLink = document.querySelector(".wallet-link");
+
+		this.walletLink.addEventListener("click", () => setClipboard(AUTHOR_WALLET));
+
 		this.init();
 	}
 
 	async init(): Promise<void> {
 		this.users = await this.getKnownUsers();
-		this.price = await this.fetchBananoPrice();
+		this.price = await fetchBananoPrice();
 		this.populateUsers();
 	}
 
@@ -43,29 +44,6 @@ class Visualizer {
 		async.eachLimit(userElems, 4, async ({ user, elem }) => {
 			await this.fetchUserBalance(user, elem);
 		});
-	}
-
-	async fetchBananoPrice(): Promise<number> {
-		try {
-			const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=Banano&vs_currencies=usd", {
-				headers: {
-					"accept": "application/json, text/javascript",
-					"sec-fetch-dest": "empty",
-					"sec-fetch-mode": "cors",
-					"sec-fetch-site": "cross-site",
-				},
-				body: null,
-				method: "GET",
-				mode: "cors",
-				credentials: "omit",
-			});
-
-			const data: CoinGeckoAPIResponse = await response.json();
-
-			return data?.banano?.usd;
-		} catch (error) {
-			return null;
-		}
 	}
 
 	async getKnownUsers(): Promise<string[]> {
@@ -92,6 +70,7 @@ class Visualizer {
 		const usdElem: HTMLElement = balanceElem.querySelector(".usd");
 
 		try {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const [_, account] = user.split("#");
 			const response = await fetch(`/api?command=get_balance&account=${account}`, {
 				headers: { "content-type": "application/json" },
