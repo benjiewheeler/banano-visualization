@@ -21,7 +21,7 @@ interface BotAccount {
 
 async function fetchBalance(account: string): Promise<number> {
 	const response = await axios.post<RPCResponse>(
-		"https://api-beta.banano.cc",
+		"https://kaliumapi.appditto.com/api",
 		{ action: "account_balance", account },
 		{ responseType: "json" }
 	);

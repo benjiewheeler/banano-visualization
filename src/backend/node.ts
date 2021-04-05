@@ -31,7 +31,7 @@ interface Response {
 
 async function fetchHistory(account: string, offset = 0): Promise<HistoryData[]> {
 	const response = await axios.post<RPCResponse>(
-		"https://api-beta.banano.cc",
+		"https://kaliumapi.appditto.com/api",
 		{ action: "account_history", account, count: 1000, offset },
 		{ responseType: "json" }
 	);
