@@ -19,8 +19,12 @@ export function abbreviateAccount(account: string): string {
 }
 
 export function saveResponse(data: APIResponse): void {
-	const cacheItem: CacheItem = { data, timestamp: Date.now() };
-	localStorage.setItem(data.account, JSON.stringify(cacheItem));
+	try {
+		const cacheItem: CacheItem = { data, timestamp: Date.now() };
+		localStorage.setItem(data.account, JSON.stringify(cacheItem));
+	} catch (error) {
+		localStorage.clear();
+	}
 }
 
 export function retrieveCache(account: string): CacheItem {

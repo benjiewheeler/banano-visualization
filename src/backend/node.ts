@@ -15,6 +15,9 @@ export type HistoryData = {
 	type: "send" | "receive";
 	account: string;
 	amount: string;
+	hash: string;
+	height: string;
+	local_timestamp: string;
 };
 
 interface RPCResponse {
@@ -29,14 +32,16 @@ interface Response {
 	body: string;
 }
 
-async function fetchHistory(account: string, offset = 0): Promise<HistoryData[]> {
+async function fetchHistory(account: string, offset = 0): Promise<Partial<HistoryData>[]> {
 	const response = await axios.post<RPCResponse>(
 		"https://kaliumapi.appditto.com/api",
 		{ action: "account_history", account, count: 1000, offset },
 		{ responseType: "json" }
 	);
 
-	return response?.data?.history;
+	return _(response?.data?.history)
+		.map(tx => _(tx).omit("hash", "height", "local_timestamp").value())
+		.value();
 }
 
 export async function handler(event: APIGatewayEvent): Promise<Response> {
@@ -55,7 +60,7 @@ export async function handler(event: APIGatewayEvent): Promise<Response> {
 	}
 
 	if (action === "account_history") {
-		const history: HistoryData[] = [];
+		const history: Partial<HistoryData>[] = [];
 
 		const offsets = _.range(0, count, DEFAULT_COUNT);
 
