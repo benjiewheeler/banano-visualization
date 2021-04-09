@@ -1,4 +1,4 @@
-import { APIGatewayEvent, Context } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
 import axios from "axios";
 
 export const BANOSHI = BigInt("1000000000000000000000000000");
@@ -37,10 +37,10 @@ async function fetchAccountsData(): Promise<BotAccount[]> {
 async function getUsers(): Promise<string[]> {
 	const accounts: BotAccount[] = await fetchAccountsData();
 
-	return accounts.map(u => `#${u.name.split("#").pop()}`).sort();
+	return accounts.map(u => u.name).sort();
 }
 
-export async function handler(event: APIGatewayEvent, context: Context): Promise<Response> {
+export async function handler(event: APIGatewayEvent): Promise<Response> {
 	const command = event?.queryStringParameters?.command;
 
 	if (command === "get_users") {
