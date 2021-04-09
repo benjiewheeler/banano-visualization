@@ -24,9 +24,16 @@ class Visualizer {
 	}
 
 	async init(): Promise<void> {
+		document.querySelector(".main").classList.add("loading");
 		this.users = await this.getKnownUsers();
-		this.price = await fetchBananoPrice();
+		await this.getBananoPrice();
 		this.populateUsers();
+	}
+
+	async getBananoPrice(): Promise<void> {
+		const price = await fetchBananoPrice();
+		if (price) this.price = price;
+		else await this.getBananoPrice();
 	}
 
 	populateUsers(): void {
@@ -41,6 +48,7 @@ class Visualizer {
 			document.querySelector(".main").appendChild(elem);
 			return { user, elem };
 		});
+		document.querySelector(".main").classList.remove("loading");
 		async.eachLimit(userElems, 4, async ({ user, elem }) => {
 			await this.fetchUserBalance(user, elem);
 		});
@@ -70,6 +78,7 @@ class Visualizer {
 		const usdElem: HTMLElement = balanceElem.querySelector(".usd");
 
 		try {
+			balanceElem.classList.add("loading");
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const [_, account] = user.split("#");
 			const response = await fetch(`/api?command=get_balance&account=${account}`, {
@@ -89,6 +98,8 @@ class Visualizer {
 			balanceElem.classList.remove("loading");
 			balanceElem.classList.add("failure");
 			balanceElem.innerText = "Failure";
+
+			setTimeout(() => this.fetchUserBalance(user, elem), 5000);
 		}
 	}
 }
