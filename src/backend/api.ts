@@ -56,9 +56,9 @@ export async function handler(event: APIGatewayEvent): Promise<Response> {
 
 	if (command === "get_balance") {
 		const accounts: BotAccount[] = await fetchAccountsData();
-		const discordId = event?.queryStringParameters?.account;
+		const account = event?.queryStringParameters?.account;
 
-		const filtered = accounts.filter(ba => ba.name.indexOf(`#${discordId}`) > 0);
+		const filtered = accounts.filter(ba => ba.name.toLowerCase() === account.toLowerCase());
 
 		if (filtered.length) {
 			const chosen = filtered[0];

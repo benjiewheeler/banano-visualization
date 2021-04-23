@@ -79,9 +79,8 @@ class Visualizer {
 
 		try {
 			balanceElem.classList.add("loading");
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const [_, account] = user.split("#");
-			const response = await fetch(`/api?command=get_balance&account=${account}`, {
+
+			const response = await fetch(`/api?command=get_balance&account=${user}`, {
 				headers: { "content-type": "application/json" },
 				body: null,
 				method: "GET",
