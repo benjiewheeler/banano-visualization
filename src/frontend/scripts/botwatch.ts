@@ -80,7 +80,7 @@ class Visualizer {
 		try {
 			balanceElem.classList.add("loading");
 
-			const response = await fetch(`/api?command=get_balance&account=${user}`, {
+			const response = await fetch(`/api?command=get_balance&account=${encodeURIComponent(user)}`, {
 				headers: { "content-type": "application/json" },
 				body: null,
 				method: "GET",
