@@ -1,5 +1,5 @@
-import { CACHE_THRESHOLD, PRICE_STORAGE_KEY } from "./constants";
-import { APIResponse, CacheItem, CoinGeckoAPIResponse, PriceCacheItem } from "./types";
+import { CACHE_THRESHOLD, PRICE_STORAGE_KEY, PUBLIC_NODES } from "./constants";
+import { APIResponse, CoinGeckoAPIResponse, HistoryCallRequest, InfoCallRequest, InfoCallResponse, PriceCacheItem } from "./types";
 
 export function setClipboard(value: string): void {
 	const elem = document.createElement("input");
@@ -18,59 +18,36 @@ export function abbreviateAccount(account: string): string {
 	return `${prefix}...${suffix}`;
 }
 
-export function saveResponse(data: APIResponse): void {
-	try {
-		const cacheItem: CacheItem = { data, timestamp: Date.now() };
-		localStorage.setItem(data.account, JSON.stringify(cacheItem));
-	} catch (error) {
-		localStorage.clear();
-	}
+export async function sendRPCCall(payload: HistoryCallRequest): Promise<InfoCallResponse>;
+export async function sendRPCCall(payload: InfoCallRequest): Promise<InfoCallResponse>;
+export async function sendRPCCall(payload: unknown): Promise<APIResponse> {
+	return makeRPCCall(payload);
 }
 
-export function retrieveCache(account: string): CacheItem {
-	const savedData = localStorage.getItem(account);
-	if (savedData) {
-		const cacheItem: CacheItem = JSON.parse(savedData);
-		if (Date.now() - cacheItem.timestamp < CACHE_THRESHOLD) {
-			return cacheItem;
-		}
+async function makeRPCCall(payload: unknown, index = 0): Promise<APIResponse> {
+	if (index >= PUBLIC_NODES.length) {
+		return { error: "Failed to load transaction history" };
 	}
-	return null;
-}
 
-export async function fetchAccountHistory(account: string): Promise<APIResponse> {
-	const cacheItem = retrieveCache(account);
-	if (cacheItem) {
-		return cacheItem.data;
-	}
+	const url = PUBLIC_NODES[index];
 
 	try {
-		const url = new URL(location.href);
-		url.hash = null;
-		url.search = "";
-		url.pathname = "/node";
-		url.searchParams.append("action", "account_history");
-		url.searchParams.append("account", account);
-		url.searchParams.append("count", "2000");
-
-		const response = await fetch(url.toString(), {
+		const response = await fetch(url, {
 			headers: {
 				"content-type": "application/json",
 				"sec-fetch-dest": "empty",
 				"sec-fetch-mode": "cors",
 				"sec-fetch-site": "cross-site",
 			},
-			body: null,
-			method: "GET",
+			body: JSON.stringify(payload),
+			method: "POST",
 			mode: "cors",
 			credentials: "omit",
 		});
 
-		const data: APIResponse = await response.json();
-		saveResponse(data);
-		return data;
+		return await response.json();
 	} catch (error) {
-		return { error: "Failed to load transaction history" };
+		return makeRPCCall(payload, index + 1);
 	}
 }
 
@@ -106,4 +83,8 @@ export async function fetchBananoPrice(): Promise<number> {
 	} catch (error) {
 		return null;
 	}
+}
+
+export function formatBANCurrency(amount: number): string {
+	return amount.toLocaleString("en", { style: "currency", currency: "BAN" });
 }

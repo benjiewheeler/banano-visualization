@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-		<title>Banano burn statistics</title>
+		<title>Banano wallet statistics</title>
 	</head>
 	<body>
 		<div class="top-bar">
@@ -15,8 +15,8 @@
 			<a href="/stats" class="nav-link">Account Stats</a>
 		</div>
 		<div class="header">
-			<h1>Banano burn statistics</h1>
-			<span class="description">Check how much banano you have burnt*</span>
+			<h1>Banano wallet statistics</h1>
+			<span class="description">View the transactions statistics of your wallet</span>
 		</div>
 		<div class="controls">
 			<div class="line">
@@ -24,19 +24,24 @@
 				<input type="submit" class="account-submit" value="LOAD" />
 			</div>
 			<div class="line">
-				<input type="submit" class="copy-btn" value="Copy link to statistics" />
+				<input type="submit" class="copy-btn" value="Copy link to graph" />
 			</div>
 		</div>
 		<div class="error">
 			<span class="message"></span>
 		</div>
 		<div class="main">
-			<span class="words">You have burnt</span>
-			<span class="ban"></span>
-			<span class="usd"></span>
+			<div class="send">
+				<div class="total">Total sent: <span class="value"></span></div>
+				<div class="top">Most sent to: <span class="value"></span></div>
+			</div>
+			<div class="receive">
+				<div class="total">Total received: <span class="value"></span></div>
+				<div class="top">Most received from: <span class="value"></span></div>
+			</div>
 		</div>
 		<div class="footer">
-			<span class="note">*This tool only checks the last 2000 transactions</span>
+			<span class="note">*This tool only checks the last 1000 transactions</span>
 			<div class="potassium-support">
 				<span>You like it ?</span>
 				<span>Send the author some potassium</span>

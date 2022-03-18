@@ -1,9 +1,9 @@
 import _ from "lodash";
 import "../style/burn.less";
 import { AUTHOR_WALLET, BANOSHI, BURN_WALLET } from "./constants";
-import { APIResponse } from "./types";
+import { HistoryCallResponse } from "./types";
 import { URLHashManager } from "./URLHashManager";
-import { fetchAccountHistory, fetchBananoPrice, setClipboard } from "./utils";
+import { fetchBananoPrice, sendRPCCall, setClipboard } from "./utils";
 
 class Visualizer {
 	hashManager: URLHashManager;
@@ -34,6 +34,8 @@ class Visualizer {
 		this.copyBtn.addEventListener("click", () => setClipboard(location.href));
 		this.walletLink.addEventListener("click", () => setClipboard(AUTHOR_WALLET));
 
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore
 		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => this.selectAccount(e.detail));
 
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
@@ -68,7 +70,7 @@ class Visualizer {
 		this.clearError();
 
 		try {
-			const data: APIResponse = await fetchAccountHistory(account);
+			const data: HistoryCallResponse = await sendRPCCall({ action: "account_history", account, count: 1000 });
 			if (data.error) {
 				this.handleError(data.error);
 				return;
@@ -85,7 +87,7 @@ class Visualizer {
 		}
 	}
 
-	calculateBurn(data: APIResponse): void {
+	calculateBurn(data: HistoryCallResponse): void {
 		const banElem: HTMLElement = this.mainElem.querySelector(".ban");
 		const usdElem: HTMLElement = this.mainElem.querySelector(".usd");
 

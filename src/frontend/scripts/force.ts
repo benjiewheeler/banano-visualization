@@ -4,9 +4,9 @@ import { SimulationLinkDatum, SimulationNodeDatum } from "d3";
 import _ from "lodash";
 import "../style/force.less";
 import { AUTHOR_WALLET, BANOSHI } from "./constants";
-import { APIResponse, LoaderConfig } from "./types";
+import { APIResponse, HistoryCallResponse, LoaderConfig } from "./types";
 import { URLHashManager } from "./URLHashManager";
-import { abbreviateAccount, fetchAccountHistory, setClipboard } from "./utils";
+import { abbreviateAccount, sendRPCCall, setClipboard } from "./utils";
 
 export interface D3Node extends SimulationNodeDatum {
 	id: string;
@@ -48,6 +48,7 @@ class Visualizer {
 		this.copyBtn.addEventListener("click", () => setClipboard(location.href));
 		this.walletLink.addEventListener("click", () => setClipboard(AUTHOR_WALLET));
 
+		// @ts-ignore
 		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => this.selectAccount(e.detail));
 
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
@@ -90,7 +91,7 @@ class Visualizer {
 		this.drawLoader({ width: 100, height: 100 });
 
 		try {
-			const data: APIResponse = await fetchAccountHistory(account);
+			const data: HistoryCallResponse = await sendRPCCall({ action: "account_history", account, count: 1000 });
 			if (data.error) {
 				this.clearCanvas();
 				this.handleError(data.error);
@@ -108,7 +109,7 @@ class Visualizer {
 		}
 	}
 
-	getNodes(data: APIResponse): D3Node[] {
+	getNodes(data: HistoryCallResponse): D3Node[] {
 		const history = _(data.history)
 			.map("account")
 			.uniq()
@@ -118,7 +119,7 @@ class Visualizer {
 		return [{ id: data.account }, ...history];
 	}
 
-	getLinks(data: APIResponse): D3Link[] {
+	getLinks(data: HistoryCallResponse): D3Link[] {
 		const output: { [target: string]: D3Link } = {};
 
 		data.history.forEach(tx => {

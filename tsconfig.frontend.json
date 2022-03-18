@@ -9,5 +9,5 @@
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true
 	},
-	"exclude": ["./webpack.config.ts", "./src/backend"]
+	"exclude": ["./webpack.config.ts"]
 }

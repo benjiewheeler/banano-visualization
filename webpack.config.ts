@@ -8,7 +8,7 @@ const config: webpack.Configuration = {
 		index: "./src/frontend/scripts/index.ts",
 		force: "./src/frontend/scripts/force.ts",
 		sankey: "./src/frontend/scripts/sankey.ts",
-		botwatch: "./src/frontend/scripts/botwatch.ts",
+		stats: "./src/frontend/scripts/stats.ts",
 	},
 	output: {
 		path: path.resolve(__dirname, "./dist"),
@@ -67,13 +67,13 @@ const config: webpack.Configuration = {
 		}),
 		new HtmlWebPackPlugin({
 			cache: true,
-			chunks: ["botwatch"],
+			chunks: ["stats"],
 			favicon: "./src/frontend/images/favicon.png",
-			filename: "./botwatch.html",
+			filename: "./stats.html",
 			inject: "head",
 			minify: false,
 			scriptLoading: "blocking",
-			template: "./src/frontend/html/botwatch.html",
+			template: "./src/frontend/html/stats.html",
 		}),
 	],
 	watchOptions: {

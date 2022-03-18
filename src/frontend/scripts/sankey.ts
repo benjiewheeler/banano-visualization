@@ -4,9 +4,9 @@ import * as d3Sankey from "d3-sankey";
 import _ from "lodash";
 import "../style/sankey.less";
 import { AUTHOR_WALLET, BANOSHI } from "./constants";
-import { APIResponse, LoaderConfig } from "./types";
+import { APIResponse, HistoryCallResponse, LoaderConfig } from "./types";
 import { URLHashManager } from "./URLHashManager";
-import { fetchAccountHistory, setClipboard, abbreviateAccount } from "./utils";
+import { sendRPCCall, setClipboard, abbreviateAccount } from "./utils";
 
 export interface D3Node extends d3Sankey.SankeyNodeMinimal<D3Node, D3Link> {
 	account: string;
@@ -49,6 +49,7 @@ class Visualizer {
 		this.copyBtn.addEventListener("click", () => setClipboard(location.href));
 		this.walletLink.addEventListener("click", () => setClipboard(AUTHOR_WALLET));
 
+		// @ts-ignore
 		addEventListener(URLHashManager.ACCOUNT_CHANGE_EVENT, (e: CustomEvent<string>) => {
 			this.selectAccount(e.detail);
 		});
@@ -95,7 +96,7 @@ class Visualizer {
 		this.drawLoader({ width: 100, height: 100 });
 
 		try {
-			const data: APIResponse = await fetchAccountHistory(account);
+			const data: HistoryCallResponse = await sendRPCCall({ action: "account_history", account, count: 100 });
 			if (data.error) {
 				this.clearCanvas();
 				this.handleError(data.error);
@@ -113,7 +114,7 @@ class Visualizer {
 		}
 	}
 
-	getNodes(data: APIResponse): D3Node[] {
+	getNodes(data: HistoryCallResponse): D3Node[] {
 		const output: D3Node[] = _(data.history)
 			.groupBy(tx => tx.type)
 			.mapValues((transactions, type) =>
@@ -134,7 +135,7 @@ class Visualizer {
 		return [{ account: data.account, id: data.account }, ...output];
 	}
 
-	getLinks(data: APIResponse): D3Link[] {
+	getLinks(data: HistoryCallResponse): D3Link[] {
 		return _(data.history)
 			.groupBy(tx => tx.type)
 			.mapValues((transactions, type) =>
@@ -177,7 +178,9 @@ class Visualizer {
 			.append("path")
 			.datum({ endAngle: 0.33 * tau })
 			.style("fill", "#4D4D4D")
+			// @ts-ignore
 			.attr("d", arc)
+			// @ts-ignore
 			.call(spin, 1500);
 
 		function spin(selection: d3.Selection<SVGPathElement, unknown, null, unknown>, duration: number) {
@@ -200,6 +203,7 @@ class Visualizer {
 			links: this.getLinks(data),
 			nodes: this.getNodes(data),
 		};
+		console.log(graph);
 
 		if (graph.nodes.length > 100) {
 			const goAhead = confirm(
@@ -213,7 +217,7 @@ class Visualizer {
 			.nodeId(d => d.id)
 			.nodeAlign(d3Sankey.sankeyJustify)
 			.nodeWidth(15)
-			.nodePadding(75)
+			.nodePadding(8)
 			.extent([
 				[5, 10],
 				[this.svgElem.clientWidth - 5, this.svgElem.clientHeight - 10],

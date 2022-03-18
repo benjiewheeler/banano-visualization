@@ -1,27 +1,25 @@
 {
 	"name": "banano-visualization",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A Banano transactions visualization made with D3.js",
 	"main": "index.js",
 	"author": "Benjamin Wheeler <benjiewheeler@yandex.com>",
 	"license": "MIT",
 	"private": true,
 	"scripts": {
-		"build.func": "tsc -p ./tsconfig.backend.json",
 		"build.dev": "webpack --progress --cache --mode development",
 		"build.prod": "webpack --cache --mode production",
 		"build.watch": "webpack serve --progress --hot --mode development"
 	},
 	"dependencies": {
 		"async": "^3.2.0",
-		"axios": "^0.21.1",
 		"d3": "^6.6.1",
 		"d3-sankey": "^0.12.3",
+		"dexie": "^3.0.3",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.5",
-		"@types/aws-lambda": "^8.10.73",
 		"@types/d3": "^6.3.0",
 		"@types/d3-sankey": "^0.11.1",
 		"@types/lodash": "^4.14.168",
